@@ -1,0 +1,218 @@
+import java.util.ArrayList;
+import java.util.Scanner;
+
+// Student class to store student info
+class Student {
+    private int id;
+    private String name;
+    private int grade;
+
+    public Student(int id, String name, int grade) {
+        this.id = id;
+        this.name = name;
+        this.grade = grade;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getGrade() {
+        return grade;
+    }
+
+    public void displayInfo() {
+        System.out.println("ID    : " + id);
+        System.out.println("Name  : " + name);
+        System.out.println("Grade : " + grade);
+        System.out.println("------------------------");
+    }
+}
+
+// Class to manage student operations
+class StudentManager {
+    private ArrayList<Student> students = new ArrayList<>();
+    private int studentIdCounter = 1;
+
+    public void addStudent(String name, int grade) {
+        if (grade < 0 || grade > 100) {
+            System.out.println("❌ Grade must be between 0 and 100.");
+            return;
+        }
+        Student s = new Student(studentIdCounter++, name, grade);
+        students.add(s);
+        System.out.println("✅ Student added successfully.\n");
+    }
+
+    public void viewAllStudents() {
+        if (students.isEmpty()) {
+            System.out.println("⚠ No students found.\n");
+        } else {
+            System.out.println("----- Student List -----");
+            for (Student s : students) {
+                s.displayInfo();
+            }
+        }
+    }
+
+    public void viewStudentGrade(String name) {
+        boolean found = false;
+        for (Student s : students) {
+            if (s.getName().equalsIgnoreCase(name)) {
+                System.out.println(name + "'s Grade: " + s.getGrade());
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            System.out.println("❌ Student not found.");
+        }
+    }
+
+    public boolean studentExists(String name) {
+        for (Student s : students) {
+            if (s.getName().equalsIgnoreCase(name)) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
+
+// Admin class
+class Admin {
+    private final String adminCode = "001";
+
+    public boolean login(String name, String code) {
+        if (code.equals(adminCode)) {
+            System.out.println("\n✅ Welcome, Admin " + name + "!\n");
+            return true;
+        } else {
+            System.out.println("❌ Invalid admin code.");
+            return false;
+        }
+    }
+}
+
+// Main class
+public class SchoolManagementSystem {
+
+    static Scanner sc = new Scanner(System.in);
+    static StudentManager manager = new StudentManager();
+
+    public static void main(String[] args) {
+        showMainMenu();
+    }
+
+    public static void showMainMenu() {
+        System.out.println("\n======= Welcome to School Management System =======");
+        System.out.println("1. Admin Login");
+        System.out.println("2. Student Login");
+        System.out.println("3. Exit");
+        System.out.print("Enter your choice: ");
+
+        try {
+            int choice = Integer.parseInt(sc.nextLine());
+            switch (choice) {
+                case 1:
+                    adminLogin();
+                    break;
+                case 2:
+                    studentLogin();
+                    break;
+                case 3:
+                    System.out.println("✅ Exiting. Goodbye!");
+                    return;
+                default:
+                    System.out.println("❌ Invalid choice. Try again.\n");
+                    showMainMenu(); // recursion
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("❌ Invalid input. Try again.\n");
+            showMainMenu(); // recursion
+        }
+    }
+
+    public static void adminLogin() {
+        System.out.print("Enter Admin Name: ");
+        String name = sc.nextLine();
+        System.out.print("Enter Admin Code: ");
+        String code = sc.nextLine();
+
+        Admin admin = new Admin();
+        if (admin.login(name, code)) {
+            adminMenu();
+        } else {
+            showMainMenu(); // retry
+        }
+    }
+
+    public static void adminMenu() {
+        System.out.println("\n====== Admin Panel ======");
+        System.out.println("1. View All Students");
+        System.out.println("2. View Student Grade");
+        System.out.println("3. Back to Main Menu");
+        System.out.print("Enter your choice: ");
+
+        try {
+            int choice = Integer.parseInt(sc.nextLine());
+            switch (choice) {
+                case 1:
+                    manager.viewAllStudents();
+                    break;
+                case 2:
+                    System.out.print("Enter Student Name to View Grade: ");
+                    String studentName = sc.nextLine();
+                    manager.viewStudentGrade(studentName);
+                    break;
+                case 3:
+                    showMainMenu();
+                    return;
+                default:
+                    System.out.println("❌ Invalid choice.");
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("❌ Please enter a number.");
+        }
+        adminMenu(); // recursion
+    }
+
+    public static void studentLogin() {
+        System.out.print("Enter Your Name: ");
+        String name = sc.nextLine();
+        System.out.print("Enter Your Grade (0-100): ");
+        try {
+            int grade = Integer.parseInt(sc.nextLine());
+            manager.addStudent(name, grade);
+            studentMenu(name);
+        } catch (NumberFormatException e) {
+            System.out.println("❌ Invalid grade input.");
+            showMainMenu(); // retry
+        }
+    }
+
+    public static void studentMenu(String studentName) {
+        System.out.println("\n====== Student Panel ======");
+        System.out.println("1. View My Details");
+        System.out.println("2. Exit to Main Menu");
+        System.out.print("Enter your choice: ");
+
+        try {
+            int choice = Integer.parseInt(sc.nextLine());
+            switch (choice) {
+                case 1:
+                    System.out.println("\nYour Details:");
+                    manager.viewStudentGrade(studentName);
+                    break;
+                case 2:
+                    showMainMenu();
+                    return;
+                default:
+                    System.out.println("❌ Invalid choice.");
+            }
+        } catch (NumberFormatException e) {
+            System.out.println("❌ Invalid input.");
+        }
+        studentMenu(studentName); // recursion
+    }
+}
